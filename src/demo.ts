@@ -1,12 +1,15 @@
-export default function load(raw: any) {
-  // rules-bag-allow: no-try-catch the parser we call throws
-  try {
-    const u = new URL(raw.href);
-    if (!u) return undefined;
-    return JSON.parse(raw.body);
-  } catch (e) {
-    throw new Error("bad input");
-  }
+import { Result, exception2Result, URI } from "@adviser/cement";
+import { type } from "arktype";
+
+const Body = type({ href: "string", body: "string" });
+
+export function load(raw: unknown): Result<string> {
+  const input = Body(raw);
+  if (input instanceof type.errors) return Result.Err(input.summary);
+  const uri = URI.from(input.href);
+  return exception2Result(() => input.body);
 }
 
-const add = (a: number, b: number) => a + b;
+export function add(a: number, b: number): number {
+  return a + b;
+}
